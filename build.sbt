@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
   cache,
   ws,
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
-  "com.amazonaws" % "aws-java-sdk" % "1.11.7"
+  "com.amazonaws" % "aws-java-sdk-s3" % "1.10.77"
 )
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
