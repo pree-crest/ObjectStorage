@@ -6,7 +6,8 @@ package utils
 object Constants {
 
   val bucketName = "testobjectstorage"
-  val AWS_ACCESS_KEY = "AKIAJUHPRVOPY3IKKYEA"
-  val AWS_SECRET_KEY = "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"
+  val AWS_ACCESS_KEY = "AKIAIP2XOA4U6YO6YYVA"
+  val AWS_SECRET_KEY = "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"
+  val TARGET_DIRECTORY = "/Users/rgn3634/Crest/Protocols/s3-data/"
 
 }
