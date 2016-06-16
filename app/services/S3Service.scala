@@ -47,7 +47,3 @@ class S3Service @Inject()(s3Client : S3Client){
   }
 
 }
-
-object Test extends  App {
-  new S3Service(new S3Client).getBucketFiles()
-}

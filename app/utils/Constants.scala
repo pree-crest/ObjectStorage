@@ -1,8 +1,6 @@
 package utils
 
-/**
-  * Created by ppn3633 on 6/14/16.
-  */
+
 object Constants {
 
   val bucketName = "testobjectstorage"
