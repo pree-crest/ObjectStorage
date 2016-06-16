@@ -1,45 +1,53 @@
 package services
 
 import java.io._
-import java.nio.file.{FileSystems, Files, StandardOpenOption}
-import java.util
 
-import com.amazonaws.services.s3.model.{ObjectListing, S3Object, S3ObjectInputStream, S3ObjectSummary}
+import com.amazonaws.services.s3.model.{ObjectListing, S3Object}
 import utils.{Constants, S3Client}
+import scala.collection.JavaConverters._
 
-class S3Service(s3Client : S3Client = new S3Client) {
+trait BucketingFile {
 
-  val filePath = "/Users/ppn3633/Documents/sampleXmlData/book.xml"
-  val fileToUpload = new File(filePath)
-
-  def saveFile(): Unit ={
-
+  def fileName( path :String ) : String = {
+    path.substring(path.lastIndexOf("/")+1)
   }
 
-  def getFile( ): Unit ={
+  def getParent( path : String ) : String = {
+    path.substring(0, path.lastIndexOf("/"))
+  }
 
-    val s3Object : S3Object = s3Client.getS3Client.getObject(Constants.bucketName,"springer-data/book.xml")
+}
+
+class S3Service(s3Client : S3Client = new S3Client) extends BucketingFile {
+
+  def getFile( fileKey :String ): Unit ={
+
+    val s3Object : S3Object = s3Client.getS3Client.getObject(Constants.bucketName,fileKey)
     val inputStream = s3Object.getObjectContent
-    val outputStream = new BufferedOutputStream(new FileOutputStream(Constants.TARGET_DIRECTORY + "/springer-data/book.xml"))
+    val outputStream = new BufferedOutputStream(new FileOutputStream(Constants.TARGET_DIRECTORY + fileName(fileKey)))
     Iterator.continually (inputStream.read).takeWhile (-1 !=).foreach (outputStream.write)
     outputStream.close()
   }
 
   def getBucketFiles(): Unit ={
-    val objectListing: ObjectListing = s3Client.getS3Client.listObjects(Constants.bucketName)
-    val summaryList  = objectListing.getObjectSummaries
-
-    var i = 1;
-    println(summaryList)
-    while( i < summaryList.size) {
-      println(summaryList.get(i).getKey)
-      i+=1
-    }
+    val objectListings = getAllObjectListing()
+    objectListings.flatMap(_.getObjectSummaries.asScala.map(_.getKey)).filter(p=> p.endsWith(".xml")).map(getFile(_))
   }
 
+  private def getAllObjectListing() : List[ObjectListing] = {
+    val objects = s3Client.getS3Client.listObjects(Constants.bucketName)
+    getAllObjectListingRecursively(List(objects))
+  }
+
+  private def getAllObjectListingRecursively(output: List[ObjectListing]): List[ObjectListing] = {
+    if(output.head.isTruncated) {
+      getAllObjectListingRecursively(s3Client.getS3Client.listNextBatchOfObjects(output.head) :: output)
+    } else {
+      output
+    }
+  }
 }
 
 object s extends  App {
   new S3Service().getBucketFiles()
-  new S3Service().getFile()
 }

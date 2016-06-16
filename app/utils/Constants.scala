@@ -8,6 +8,6 @@ object Constants {
   val bucketName = "testobjectstorage"
   val AWS_ACCESS_KEY = "AKIAIP2XOA4U6YO6YYVA"
   val AWS_SECRET_KEY = "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"
-  val TARGET_DIRECTORY = "/Users/rgn3634/Crest/Protocols/s3-data/"
+  val TARGET_DIRECTORY = "/Users/rgn3634/Crest/Protocols/s3-data/springer-data/"
 
 }
