@@ -9,7 +9,8 @@ import scala.collection.JavaConverters._
 trait BucketingFile {
 
   def fileName( path :String ) : String = {
-    path.substring(path.lastIndexOf("/")+1)
+    val x = path.substring(path.lastIndexOf("/")+1)
+    x
   }
 
   def getParent( path : String ) : String = {
@@ -21,12 +22,16 @@ trait BucketingFile {
 class S3Service(s3Client : S3Client = new S3Client) extends BucketingFile {
 
   def getFile( fileKey :String ): Unit ={
-
-    val s3Object : S3Object = s3Client.getS3Client.getObject(Constants.bucketName,fileKey)
-    val inputStream = s3Object.getObjectContent
     val outputStream = new BufferedOutputStream(new FileOutputStream(Constants.TARGET_DIRECTORY + fileName(fileKey)))
-    Iterator.continually (inputStream.read).takeWhile (-1 !=).foreach (outputStream.write)
-    outputStream.close()
+    try{
+      val s3Object : S3Object = s3Client.getS3Client.getObject(Constants.bucketName,fileKey)
+      val inputStream = s3Object.getObjectContent
+      Iterator.continually (inputStream.read).takeWhile (-1 !=).foreach (outputStream.write)
+    }catch{
+      case e : Exception => throw e ;
+    }finally{
+      outputStream.close()
+    }
   }
 
   def getBucketFiles(): Unit ={
@@ -35,8 +40,8 @@ class S3Service(s3Client : S3Client = new S3Client) extends BucketingFile {
   }
 
   private def getAllObjectListing() : List[ObjectListing] = {
-    val objects = s3Client.getS3Client.listObjects(Constants.bucketName)
-    getAllObjectListingRecursively(List(objects))
+    val objects: ObjectListing = s3Client.getS3Client.listObjects(Constants.bucketName)
+     getAllObjectListingRecursively(List(objects))
   }
 
   private def getAllObjectListingRecursively(output: List[ObjectListing]): List[ObjectListing] = {
